@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw 虚拟机隔离安装完整指南</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 动态背景 */
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 粒子背景容器 */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        header p {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 目录样式 */
+        .toc {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .toc h2 {
+            color: #667eea;
+            font-size: 1.6em;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 4px solid #667eea;
+        }
+
+        .toc-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .toc-item:hover a {
+            color: white;
+        }
+
+        .toc-item a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .toc-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* 内容区块样式 */
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section h3 {
+            color: #2a5298;
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+            padding-left: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h4 {
+            color: #495057;
+            font-size: 1.15em;
+            margin: 20px 0 10px 0;
+        }
+
+        /* 步骤样式 */
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin: 0 0 10px 0;
+            color: #1e3c72;
+            font-size: 1.1em;
+        }
+
+        .step-content p {
+            color: #555;
+        }
+
+        /* 命令框样式 */
+        .command-box {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #00ff88;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            position: relative;
+            overflow-x: auto;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .command-box::before {
+            content: '📋 点击复制命令';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-family: 'Microsoft YaHei', sans-serif;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .command-box code {
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .command-box:hover {
+            cursor: pointer;
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        /* 警告框样式 */
+        .warning {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-left: 5px solid #ffc107;
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.2);
+        }
+
+        .warning::before {
+            content: '⚠️ 注意事项';
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #856404;
+            font-size: 1.1em;
+        }
+
+        .warning p {
+            color: #664d03;
+        }
+
+        /* 危险警告样式 */
+        .danger {
+            background: linear-gradient(135deg, #ffe6e6 0%, #f8d7da 100%);
+            border-left: 5px solid #dc3545;
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 5px 20px rgba(220, 53, 69, 0.2);
+        }
+
+        .danger::before {
+            content: '🚫 警告';
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #721c24;
+            font-size: 1.1em;
+        }
+
+        .danger p {
+            color: #721c24;
+        }
+
+        /* 成功提示样式 */
+        .success {
+            background: linear-gradient(135deg, #e6fff0 0%, #d4edda 100%);
+            border-left: 5px solid #28a745;
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.2);
+        }
+
+        .success::before {
+            content: '✅ 成功提示';
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #155724;
+            font-size: 1.1em;
+        }
+
+        .success p {
+            color: #155724;
+        }
+
+        /* 小贴士样式 */
+        .tip {
+            background: linear-gradient(135deg, #e6f9ff 0%, #d1ecf1 100%);
+            border-left: 5px solid #17a2b8;
+            padding: 20px 25px;
+            margin: 25px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 5px 20px rgba(23, 162, 184, 0.2);
+        }
+
+        .tip::before {
+            content: '💡 小贴士';
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #0c5460;
+            font-size: 1.1em;
+        }
+
+        .tip p, .tip ul, .tip li {
+            color: #0c5460;
+        }
+
+        /* 表格样式 */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 25px 0;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px 18px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 链接列表样式 */
+        .link-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .link-list li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .link-list li:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding-left: 30px;
+        }
+
+        .link-list a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .link-list a:hover {
+            color: #764ba2;
+        }
+
+        /* 快速参考卡 */
+        .quick-ref {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .quick-ref h3 {
+            color: #fff;
+            margin: 0 0 20px 0;
+            padding: 0;
+            border: none;
+            font-size: 1.3em;
+        }
+
+        .quick-ref .command-box {
+            margin: 15px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0;
+        }
+
+        footer .version-info {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            .step {
+                flex-direction: column;
+            }
+
+            .step-number {
+                margin-bottom: 15px;
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+
+        /* 列表样式 */
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        /* 行内代码 */
+        code:not([class]) {
+            background: #f1f3f4;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Consolas', monospace;
+            color: #e83e8c;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景 -->
+    <div id="particles"></div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <header>
+            <h1>🤖 OpenClaw 虚拟机隔离安装指南</h1>
+            <p>在 Ubuntu 20.04 主机上通过 VirtualBox 虚拟机隔离运行 OpenClaw</p>
+            <div class="version-badge">📅 更新于 2026年4月2日 | Ubuntu 20.04 LTS</div>
+        </header>
+
+        <!-- 目录 -->
+        <div class="toc">
+            <h2>📑 目录导航</h2>
+            <div class="toc-grid">
+                <div class="toc-item">
+                    <span class="toc-number">1</span>
+                    <a href="#section1">准备工作与系统要求</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">2</span>
+                    <a href="#section2">安装 VirtualBox 虚拟机软件</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">3</span>
+                    <a href="#section3">创建虚拟机并安装 Ubuntu</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">4</span>
+                    <a href="#section4">虚拟机系统基础配置</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">5</span>
+                    <a href="#section5">安装 OpenClaw</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">6</span>
+                    <a href="#section6">虚拟机隔离与安全设置</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">7</span>
+                    <a href="#section7">常见问题与故障排除</a>
+                </div>
+                <div class="toc-item">
+                    <span class="toc-number">8</span>
+                    <a href="#section8">参考资源</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第一部分：准备工作 -->
+        <div class="section" id="section1">
+            <h2>📦 第一部分：准备工作与系统要求</h2>
+
+            <h3>1.1 环境说明</h3>
+            <p>本指南适用于以下环境：</p>
+            <ul>
+                <li><strong>主机系统：</strong>Ubuntu 20.04 LTS（你的当前系统）</li>
+                <li><strong>虚拟机软件：</strong>VirtualBox（开源免费）</li>
+                <li><strong>虚拟机系统：</strong>Ubuntu 20.04 LTS（与主机相同版本，兼容性好）</li>
+                <li><strong>目标应用：</strong>OpenClaw AI 助手</li>
+            </ul>
+
+            <div class="tip">
+                <p><strong>为什么选择虚拟机隔离？</strong></p>
+                <ul>
+                    <li>✅ OpenClaw 运行在独立环境中，不影响主机系统</li>
+                    <li>✅ 可以随时创建快照，出问题可快速恢复</li>
+                    <li>✅ 网络隔离，保护主机数据安全</li>
+                    <li>✅ 方便测试和实验</li>
+                </ul>
+            </div>
+
+            <h3>1.2 系统要求检查</h3>
+
+            <p>首先检查你的主机是否满足要求：</p>
+
+            <div class="command-box">
+                <code># 检查 CPU 信息
+lscpu | grep -E "^CPU\(s\)|^Model name"
+
+# 检查内存
+free -h
+
+# 检查磁盘空间
+df -h /</code>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>项目</th>
+                        <th>最低要求</th>
+                        <th>推荐配置</th>
+                    </tr>
+                    <tr>
+                        <td>主机内存 (RAM)</td>
+                        <td>8 GB</td>
+                        <td>16 GB 或更多</td>
+                    </tr>
+                    <tr>
+                        <td>可用磁盘空间</td>
+                        <td>30 GB</td>
+                        <td>60 GB 或更多</td>
+                    </tr>
+                    <tr>
+                        <td>CPU 核心</td>
+                        <td>4 核</td>
+                        <td>6 核或更多</td>
+                    </tr>
+                    <tr>
+                        <td>虚拟机内存分配</td>
+                        <td>4 GB</td>
+                        <td>6-8 GB</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="warning">
+                <p><strong>重要：</strong>确保主机至少有 8GB 内存！如果你只有 8GB，建议给虚拟机分配 4GB，留 4GB 给主机。如果内存不足，系统会变得非常卡顿。</p>
+            </div>
+
+            <h3>1.3 下载所需文件</h3>
+
+            <p>需要下载 Ubuntu 20.04 ISO 镜像文件：</p>
+
+            <div class="command-box">
+                <code># 方法1：使用 wget 下载（推荐，国内镜像源）
+cd ~/Downloads
+wget https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/ubuntu-20.04.6-desktop-amd64.iso
+
+# 方法2：使用 curl 下载
+curl -L -o ubuntu-20.04.6-desktop-amd64.iso https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/ubuntu-20.04.6-desktop-amd64.iso</code>
+            </div>
+
+            <div class="tip">
+                <p><strong>下载地址备选：</strong></p>
+                <ul>
+                    <li>清华镜像：<code>https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/</code></li>
+                    <li>阿里镜像：<code>https://mirrors.aliyun.com/ubuntu-releases/20.04/</code></li>
+                    <li>官方地址：<code>https://ubuntu.com/download/desktop</code></li>
+                </ul>
+            </div>
+
+            <p>ISO 文件大小约 4.5GB，下载可能需要一些时间。</p>
+        </div>
+
+        <!-- 第二部分：安装 VirtualBox -->
+        <div class="section" id="section2">
+            <h2>🖥️ 第二部分：安装 VirtualBox 虚拟机软件</h2>
+
+            <h3>2.1 安装 VirtualBox</h3>
+
+            <p>在 Ubuntu 20.04 主机上安装 VirtualBox：</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>更新软件包列表</h4>
+                    <div class="command-box">
+                        <code>sudo apt update</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>安装 VirtualBox 和扩展包</h4>
+                    <div class="command-box">
+                        <code># 安装 VirtualBox
+sudo apt install -y virtualbox virtualbox-ext-pack
+
+# 如果上面的命令报错，使用以下方法安装最新版本：
+wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+sudo apt update
+sudo apt install -y virtualbox-7.0</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>将当前用户添加到 vboxusers 组（重要！）</h4>
+                    <div class="command-box">
+                        <code>sudo usermod -aG vboxusers $USER</code>
+                    </div>
+                    <p>执行后需要<strong>注销并重新登录</strong>才能生效。</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>验证安装</h4>
+                    <div class="command-box">
+                        <code># 检查 VirtualBox 版本
+vboxmanage --version
+
+# 启动 VirtualBox 图形界面（可选）
+virtualbox &</code>
+                    </div>
+                </div>
+            </div>
+
+            <h3>2.2 安装 VirtualBox Extension Pack（推荐）</h3>
+
+            <p>扩展包提供 USB 2.0/3.0 支持、RDP、磁盘加密等功能：</p>
+
+            <div class="command-box">
+                <code># 查看已安装的 VirtualBox 版本
+VBoxManage --version | cut -d r -f 1
+
+# 下载对应版本的扩展包（假设是 7.0.x）
+wget https://download.virtualbox.org/virtualbox/7.0.18/Oracle_VM_VirtualBox_Extension_Pack-7.0.18.vbox-extpack
+
+# 安装扩展包
+sudo VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-*.vbox-extpack</code>
+            </div>
+
+            <div class="warning">
+                <p>扩展包版本必须与 VirtualBox 版本完全匹配！请根据 <code>vboxmanage --version</code> 的输出下载对应版本。</p>
+            </div>
+        </div>
+
+        <!-- 第三部分：创建虚拟机 -->
+        <div class="section" id="section3">
+            <h2>🐧 第三部分：创建虚拟机并安装 Ubuntu</h2>
+
+            <h3>3.1 创建虚拟机</h3>
+
+            <p>你可以使用图形界面或命令行创建虚拟机。这里提供两种方法：</p>
+
+            <h4>方法 A：图形界面创建（推荐新手）</h4>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>启动 VirtualBox</h4>
+                    <div class="command-box">
+                        <code>virtualbox &</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>点击「新建」按钮</h4>
+                    <p>填写以下信息：</p>
+                    <ul>
+                        <li><strong>名称：</strong>OpenClaw-VM</li>
+                        <li><strong>类型：</strong>Linux</li>
+                        <li><strong>版本：</strong>Ubuntu (64-bit)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>分配内存</h4>
+                    <p>建议：<strong>4096 MB（4GB）</strong>或更多（取决于你的主机内存）</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>创建虚拟硬盘</h4>
+                    <ul>
+                        <li>选择「现在创建虚拟硬盘」</li>
+                        <li>硬盘文件类型：VDI (VirtualBox 磁盘映像)</li>
+                        <li>存储方式：动态分配（推荐，节省空间）</li>
+                        <li>大小：<strong>50 GB</strong> 或更多</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4>方法 B：命令行创建（快速）</h4>
+
+            <div class="command-box">
+                <code># 创建虚拟机
+VBoxManage createvm --name "OpenClaw-VM" --register
+
+# 设置内存和 CPU
+VBoxManage modifyvm "OpenClaw-VM" --memory 4096 --cpus 2
+
+# 创建虚拟硬盘
+VBoxManage createhd --filename ~/VirtualBox\ VMs/OpenClaw-VM/disk.vdi --size 51200
+
+# 添加 SATA 控制器和硬盘
+VBoxManage storagectl "OpenClaw-VM" --name "SATA Controller" --add sata
+VBoxManage storageattach "OpenClaw-VM" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium ~/VirtualBox\ VMs/OpenClaw-VM/disk.vdi
+
+# 挂载 ISO 镜像
+VBoxManage storagectl "OpenClaw-VM" --name "IDE Controller" --add ide
+VBoxManage storageattach "OpenClaw-VM" --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ~/Downloads/ubuntu-20.04.6-desktop-amd64.iso</code>
+            </div>
+
+            <h3>3.2 配置虚拟机网络（重要！）</h3>
+
+            <p>为了实现网络隔离，我们使用 NAT 模式：</p>
+
+            <div class="command-box">
+                <code># 设置网络为 NAT 模式（默认，虚拟机可通过主机上网，但外部无法直接访问虚拟机）
+VBoxManage modifyvm "OpenClaw-VM" --nic1 nat
+
+# 如果需要从主机 SSH 连接虚拟机，需要设置端口转发
+VBoxManage modifyvm "OpenClaw-VM" --natpf1 "ssh,tcp,,2222,,22"</code>
+            </div>
+
+            <div class="tip">
+                <p><strong>网络模式说明：</strong></p>
+                <ul>
+                    <li><strong>NAT（推荐）：</strong>虚拟机通过主机上网，外部无法直接访问虚拟机，实现网络隔离</li>
+                    <li><strong>桥接：</strong>虚拟机获得独立 IP，与主机在同一网络，隔离性较差</li>
+                    <li><strong>Host-Only：</strong>虚拟机只能与主机通信，无法上网</li>
+                    <li><strong>Internal：</strong>完全隔离，虚拟机之间可通信，但无法上网</li>
+                </ul>
+            </div>
+
+            <h3>3.3 启动虚拟机并安装 Ubuntu</h3>
+
+            <div class="command-box">
+                <code># 启动虚拟机（图形界面模式）
+VBoxManage startvm "OpenClaw-VM"
+
+# 或使用无头模式（后台运行，需要远程连接）
+VBoxManage startvm "OpenClaw-VM" --type headless</code>
+            </div>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>选择安装语言</h4>
+                    <p>建议选择「中文(简体)」或「English」</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>选择「安装 Ubuntu」</h4>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>键盘布局</h4>
+                    <p>选择「Chinese」或「US」</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>安装类型</h4>
+                    <p>选择「正常安装」</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>安装方式</h4>
+                    <p>选择「清除整个磁盘并安装 Ubuntu」（这是虚拟磁盘，不会影响主机）</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h4>设置用户信息（请牢记！）</h4>
+                    <ul>
+                        <li><strong>您的姓名：</strong>openclaw</li>
+                        <li><strong>计算机名：</strong>openclaw-vm</li>
+                        <li><strong>用户名：</strong>openclaw</li>
+                        <li><strong>密码：</strong>设置一个你记得住的密码</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning">
+                <p><strong>请牢记用户名和密码！</strong>后续操作会频繁使用。</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <h4>等待安装完成</h4>
+                    <p>安装过程约 15-30 分钟。安装完成后，重启虚拟机。</p>
+                </div>
+            </div>
+
+            <h3>3.4 安装 VirtualBox Guest Additions（增强功能）</h3>
+
+            <p>增强功能可以提供更好的性能和功能（剪贴板共享、文件夹共享、全屏模式等）：</p>
+
+            <div class="command-box">
+                <code># 在虚拟机中安装依赖
+sudo apt update
+sudo apt install -y build-essential dkms linux-headers-$(uname -r)
+
+# 在 VirtualBox 菜单：设备 -> 安装增强功能
+# 然后在虚拟机中运行：
+cd /media/openclaw/VBox_GAs_*
+sudo ./VBoxLinuxAdditions.run
+
+# 重启虚拟机
+sudo reboot</code>
+            </div>
+
+            <div class="success">
+                <p>安装增强功能后，你可以：</p>
+                <ul>
+                    <li>在主机和虚拟机之间复制粘贴文本</li>
+                    <li>使用共享文件夹</li>
+                    <li>全屏显示虚拟机</li>
+                    <li>更好的图形性能</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 第四部分：虚拟机系统配置 -->
+        <div class="section" id="section4">
+            <h2>⚙️ 第四部分：虚拟机系统基础配置</h2>
+
+            <h3>4.1 更换国内软件源（加速下载）</h3>
+
+            <div class="command-box">
+                <code># 备份原始源文件
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
+
+# 使用阿里云源
+sudo cat > /etc/apt/sources.list << 'EOF'
+deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+EOF
+
+# 更新软件列表
+sudo apt update && sudo apt upgrade -y</code>
+            </div>
+
+            <h3>4.2 安装基础工具</h3>
+
+            <div class="command-box">
+                <code>sudo apt install -y curl wget git vim net-tools openssh-server build-essential</code>
+            </div>
+
+            <h3>4.3 安装 Node.js（OpenClaw 依赖）</h3>
+
+            <p>OpenClaw 需要 Node.js 22.14+ 或 Node.js 24。推荐使用 nvm 安装：</p>
+
+            <div class="command-box">
+                <code># 安装 nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# 使 nvm 生效
+source ~/.bashrc
+
+# 如果 source 无效，重新打开终端或执行：
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# 安装 Node.js 24
+nvm install 24
+nvm use 24
+nvm alias default 24
+
+# 验证安装
+node -v
+npm -v</code>
+            </div>
+
+            <div class="warning">
+                <p>如果 nvm 安装失败（网络问题），使用以下备用方法：</p>
+                <div class="command-box">
+                    <code># 使用 NodeSource 仓库安装
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# 验证
+node -v
+npm -v</code>
+                </div>
+            </div>
+
+            <h3>4.4 配置 npm 国内镜像（可选）</h3>
+
+            <div class="command-box">
+                <code># 使用淘宝镜像加速 npm 下载
+npm config set registry https://registry.npmmirror.com
+
+# 验证
+npm config get registry</code>
+            </div>
+        </div>
+
+        <!-- 第五部分：安装 OpenClaw -->
+        <div class="section" id="section5">
+            <h2>🤖 第五部分：安装 OpenClaw</h2>
+
+            <h3>5.1 使用官方安装脚本（推荐）</h3>
+
+            <div class="command-box">
+                <code># 运行官方安装脚本
+curl -fsSL https://openclaw.ai/install.sh | bash</code>
+            </div>
+
+            <div class="tip">
+                <p>如果官方脚本安装失败，可以使用 npm 安装：</p>
+                <div class="command-box">
+                    <code># 使用 npm 安装
+npm install -g openclaw@latest
+
+# 如果遇到 sharp 构建错误
+SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install -g openclaw@latest</code>
+                </div>
+            </div>
+
+            <h3>5.2 验证安装</h3>
+
+            <div class="command-box">
+                <code># 确认 CLI 可用
+openclaw --version
+
+# 检查配置问题
+openclaw doctor
+
+# 验证 Gateway 运行状态
+openclaw gateway status</code>
+            </div>
+
+            <h3>5.3 运行配置向导</h3>
+
+            <div class="command-box">
+                <code># 启动配置向导
+openclaw onboard --install-daemon</code>
+            </div>
+
+            <p>配置向导会引导你完成以下设置：</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>选择连接模式</h4>
+                    <p>推荐选择：<strong>loopback + token</strong> 模式</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>配置 API Key</h4>
+                    <p>你需要准备以下 API Key 之一：</p>
+                    <ul>
+                        <li>OpenAI API Key</li>
+                        <li>Anthropic (Claude) API Key</li>
+                        <li>其他支持的模型 API Key</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>配置消息通道（可选）</h4>
+                    <p>你可以配置以下消息通道：</p>
+                    <ul>
+                        <li>Telegram Bot</li>
+                        <li>飞书（Lark）</li>
+                        <li>Discord</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>5.4 启动 OpenClaw</h3>
+
+            <div class="command-box">
+                <code># 启动 OpenClaw
+openclaw start
+
+# 查看状态
+openclaw status
+
+# 查看日志
+openclaw logs</code>
+            </div>
+
+            <div class="success">
+                <p>🎉 恭喜！你已经成功在隔离的虚拟机环境中安装并运行了 OpenClaw！</p>
+            </div>
+
+            <!-- 快速命令参考 -->
+            <div class="quick-ref">
+                <h3>⚡ OpenClaw 常用命令速查</h3>
+                <div class="command-box">
+                    <code>openclaw start       # 启动
+openclaw stop        # 停止
+openclaw restart     # 重启
+openclaw status      # 查看状态
+openclaw logs        # 查看日志
+openclaw doctor      # 诊断问题
+openclaw --version   # 查看版本
+openclaw --help      # 帮助信息</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第六部分：虚拟机隔离与安全 -->
+        <div class="section" id="section6">
+            <h2>🔒 第六部分：虚拟机隔离与安全设置</h2>
+
+            <p>这部分非常重要！确保虚拟机中的操作不会影响你的主机。</p>
+
+            <h3>6.1 网络隔离设置</h3>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>确认使用 NAT 模式</h4>
+                    <p>NAT 模式下，虚拟机通过主机的网络连接上网，但外部网络无法直接访问虚拟机。</p>
+                    <div class="command-box">
+                        <code># 检查网络模式
+VBoxManage showvminfo "OpenClaw-VM" | grep "NIC 1"
+
+# 如果不是 NAT，修改为 NAT
+VBoxManage modifyvm "OpenClaw-VM" --nic1 nat</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>禁用共享文件夹（如果不需要）</h4>
+                    <div class="command-box">
+                        <code># 移除所有共享文件夹
+VBoxManage sharedfolder remove "OpenClaw-VM" --name <folder_name>
+
+# 或在图形界面：设置 -> 共享文件夹 -> 无</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>禁用拖放和剪贴板（可选，更高安全性）</h4>
+                    <div class="command-box">
+                        <code># 禁用拖放和剪贴板
+VBoxManage modifyvm "OpenClaw-VM" --draganddrop disabled
+VBoxManage modifyvm "OpenClaw-VM" --clipboard disabled</code>
+                    </div>
+                </div>
+            </div>
+
+            <h3>6.2 虚拟机内部防火墙</h3>
+
+            <p>在虚拟机内部配置防火墙，进一步增强隔离：</p>
+
+            <div class="command-box">
+                <code># 在虚拟机内执行：
+# 安装 UFW 防火墙
+sudo apt install -y ufw
+
+# 启用防火墙
+sudo ufw enable
+
+# 只允许 SSH（如果需要）
+sudo ufw allow ssh
+
+# 查看状态
+sudo ufw status verbose</code>
+            </div>
+
+            <h3>6.3 创建快照（重要保护）</h3>
+
+            <p>快照可以保存虚拟机的当前状态，如果出现问题可以快速恢复。</p>
+
+            <div class="command-box">
+                <code># 创建快照
+VBoxManage snapshot "OpenClaw-VM" take "OpenClaw-Installed" --description "OpenClaw 安装完成后的干净状态"
+
+# 查看快照列表
+VBoxManage snapshot "OpenClaw-VM" list
+
+# 恢复到快照（如果需要）
+VBoxManage snapshot "OpenClaw-VM" restore "OpenClaw-Installed"
+
+# 删除快照
+VBoxManage snapshot "OpenClaw-VM" delete "OpenClaw-Installed"</code>
+            </div>
+
+            <div class="warning">
+                <p><strong>建议：</strong>在进行任何可能影响系统的操作之前，先创建一个快照！这样如果出现问题，可以立即恢复到正常状态。</p>
+            </div>
+
+            <h3>6.4 完全隔离模式（最高安全）</h3>
+
+            <p>如果你需要最大程度的隔离，可以使用 Internal 网络模式：</p>
+
+            <div class="command-box">
+                <code># 设置为内部网络模式（虚拟机无法上网）
+VBoxManage modifyvm "OpenClaw-VM" --nic1 intnet</code>
+            </div>
+
+            <div class="danger">
+                <p><strong>注意：</strong>Internal 模式下，虚拟机无法访问外部网络，OpenClaw 将无法连接 API。除非有特殊安全需求，否则不建议使用此模式。</p>
+            </div>
+
+            <h3>6.5 隔离设置总结</h3>
+
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>隔离级别</th>
+                        <th>设置</th>
+                        <th>影响</th>
+                    </tr>
+                    <tr>
+                        <td>基础（推荐）</td>
+                        <td>NAT 网络模式</td>
+                        <td>虚拟机可上网，外部无法直接访问虚拟机</td>
+                    </tr>
+                    <tr>
+                        <td>中等</td>
+                        <td>禁用共享文件夹、剪贴板</td>
+                        <td>无法在主机和虚拟机间直接传输文件</td>
+                    </tr>
+                    <tr>
+                        <td>高级</td>
+                        <td>启用虚拟机防火墙</td>
+                        <td>限制虚拟机内部网络访问</td>
+                    </tr>
+                    <tr>
+                        <td>最高</td>
+                        <td>Internal 网络模式</td>
+                        <td>虚拟机完全无法上网（不适用于 OpenClaw）</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 第七部分：常见问题 -->
+        <div class="section" id="section7">
+            <h2>❓ 第七部分：常见问题与故障排除</h2>
+
+            <h3>7.1 VirtualBox 相关问题</h3>
+
+            <h4>问题：VirtualBox 启动报错 "Kernel driver not installed"</h4>
+            <div class="command-box">
+                <code># 重新加载内核模块
+sudo /sbin/vboxconfig
+
+# 如果仍然失败，重新安装
+sudo apt remove --purge virtualbox*
+sudo apt install -y virtualbox virtualbox-ext-pack
+sudo usermod -aG vboxusers $USER
+# 注销并重新登录</code>
+            </div>
+
+            <h4>问题：虚拟机无法启动，提示 VT-x/AMD-V 错误</h4>
+            <div class="command-box">
+                <code># 检查 CPU 是否支持虚拟化
+egrep -c '(vmx|svm)' /proc/cpuinfo
+# 如果返回 0，说明 CPU 不支持虚拟化或未在 BIOS 中启用
+
+# 启用嵌套虚拟化（如果在虚拟机中运行）
+VBoxManage modifyvm "OpenClaw-VM" --nested-hw-virt on</code>
+            </div>
+
+            <h4>问题：虚拟机运行缓慢</h4>
+            <ul>
+                <li>增加虚拟机内存（如果主机有足够内存）</li>
+                <li>增加虚拟机 CPU 核心数</li>
+                <li>启用 3D 加速：设置 -> 显示 -> 启用 3D 加速</li>
+                <li>为虚拟机磁盘启用 SSD 模拟：设置 -> 存储 -> 勾选「固态驱动器」</li>
+            </ul>
+
+            <h3>7.2 OpenClaw 相关问题</h3>
+
+            <h4>问题：openclaw 命令找不到</h4>
+            <div class="command-box">
+                <code># 检查 Node.js 是否安装
+node -v
+
+# 检查 npm 全局 bin 目录
+npm prefix -g
+
+# 检查 PATH
+echo "$PATH"
+
+# 如果 npm bin 目录不在 PATH 中，添加：
+echo 'export PATH="$(npm prefix -g)/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc</code>
+            </div>
+
+            <h4>问题：npm 安装缓慢或失败</h4>
+            <div class="command-box">
+                <code># 使用国内镜像
+npm config set registry https://registry.npmmirror.com
+
+# 验证
+npm config get registry</code>
+            </div>
+
+            <h4>问题：OpenClaw 启动失败</h4>
+            <div class="command-box">
+                <code># 查看详细错误日志
+openclaw logs --tail 100
+
+# 检查配置
+openclaw doctor
+
+# 重新运行配置向导
+openclaw onboard
+
+# 完全重装
+npm uninstall -g openclaw
+npm install -g openclaw@latest
+openclaw onboard --install-daemon</code>
+            </div>
+
+            <h3>7.3 网络相关问题</h3>
+
+            <h4>问题：虚拟机无法上网</h4>
+            <div class="command-box">
+                <code># 检查网络接口
+ip addr show
+
+# 检查 DNS
+ping 8.8.8.8
+ping google.com
+
+# 如果 DNS 问题，编辑 resolv.conf
+sudo vim /etc/resolv.conf
+# 添加：
+# nameserver 8.8.8.8
+# nameserver 114.114.114.114</code>
+            </div>
+
+            <h4>问题：从主机 SSH 连接虚拟机失败</h4>
+            <div class="command-box">
+                <code># 确保设置了端口转发
+VBoxManage modifyvm "OpenClaw-VM" --natpf1 "ssh,tcp,,2222,,22"
+
+# 确保虚拟机内 SSH 服务运行
+sudo systemctl status ssh
+
+# 从主机连接
+ssh -p 2222 openclaw@localhost</code>
+            </div>
+        </div>
+
+        <!-- 第八部分：参考资源 -->
+        <div class="section" id="section8">
+            <h2>📚 第八部分：参考资源</h2>
+
+            <h3>8.1 官方文档</h3>
+            <ul class="link-list">
+                <li>📘 <a href="https://docs.openclaw.ai/install" target="_blank">OpenClaw 官方安装文档</a></li>
+                <li>📘 <a href="https://openclaw.ai/" target="_blank">OpenClaw 官网</a></li>
+                <li>📘 <a href="https://github.com/openclaw/openclaw" target="_blank">OpenClaw GitHub 仓库</a></li>
+                <li>📗 <a href="https://www.virtualbox.org/manual/" target="_blank">VirtualBox 官方手册</a></li>
+            </ul>
+
+            <h3>8.2 下载资源</h3>
+            <ul class="link-list">
+                <li>🐧 <a href="https://ubuntu.com/download/desktop" target="_blank">Ubuntu 官方下载</a></li>
+                <li>🐧 <a href="https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/" target="_blank">清华大学 Ubuntu 镜像</a></li>
+                <li>🐧 <a href="https://mirrors.aliyun.com/ubuntu-releases/" target="_blank">阿里云 Ubuntu 镜像</a></li>
+                <li>💿 <a href="https://www.virtualbox.org/wiki/Downloads" target="_blank">VirtualBox 下载</a></li>
+            </ul>
+
+            <h3>8.3 中文教程</h3>
+            <ul class="link-list">
+                <li>📖 <a href="https://zhuanlan.zhihu.com/p/2011171173191423489" target="_blank">VMWare虚拟机OpenClaw部署踩坑实录</a></li>
+                <li>📖 <a href="https://www.cnblogs.com/databank/p/19610007" target="_blank">OpenClaw 在Ubuntu系统中的完整安装教程</a></li>
+                <li>📖 <a href="https://linux.do/t/topic/1761373" target="_blank">虚拟机Ubuntu安装OpenClaw并连接CPA</a></li>
+            </ul>
+        </div>
+
+        <!-- 快速命令参考卡 -->
+        <div class="quick-ref">
+            <h3>⚡ 快速命令参考卡</h3>
+
+            <h4 style="color: #00ff88; margin-top: 20px;">VirtualBox 管理</h4>
+            <div class="command-box">
+                <code># 主机上执行
+VBoxManage list vms              # 列出所有虚拟机
+VBoxManage startvm "OpenClaw-VM" # 启动虚拟机
+VBoxManage controlvm "OpenClaw-VM" poweroff  # 强制关闭
+VBoxManage snapshot "OpenClaw-VM" take "name" # 创建快照</code>
+            </div>
+
+            <h4 style="color: #00ff88; margin-top: 20px;">虚拟机内 OpenClaw 操作</h4>
+            <div class="command-box">
+                <code>openclaw start      # 启动
+openclaw stop       # 停止
+openclaw status     # 状态
+openclaw logs       # 日志
+openclaw doctor     # 诊断</code>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer>
+            <p>📖 OpenClaw 虚拟机隔离安装完整指南</p>
+            <p>适用于 Ubuntu 20.04 主机 + VirtualBox 虚拟机环境</p>
+            <div class="version-info">📅 最后更新：2026年4月2日</div>
+        </footer>
+    </div>
+
+    <!-- 粒子背景动画脚本 -->
+    <script>
+        // 创建粒子
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // 随机大小
+                const size = Math.random() * 15 + 5;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                // 随机位置
+                particle.style.left = Math.random() * 100 + '%';
+
+                // 随机延迟
+                particle.style.animationDelay = Math.random() * 20 + 's';
+
+                // 随机持续时间
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+
+                // 随机颜色
+                const colors = ['rgba(102, 126, 234, 0.3)', 'rgba(118, 75, 162, 0.3)', 'rgba(240, 147, 251, 0.3)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                container.appendChild(particle);
+            }
+        }
+
+        // 命令框点击复制功能
+        function setupCopyButtons() {
+            document.querySelectorAll('.command-box').forEach(box => {
+                box.addEventListener('click', function() {
+                    const code = this.querySelector('code').textContent;
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = this.style.cssText;
+                        this.style.borderColor = '#00ff88';
+                        setTimeout(() => {
+                            this.style.borderColor = originalText;
+                        }, 500);
+                    });
+                });
+            });
+        }
+
+        // 平滑滚动
+        function setupSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupCopyButtons();
+            setupSmoothScroll();
+        });
+    </script>
+</body>
+</html>
