@@ -1,13 +1,13 @@
 # 🤖 OpenClaw 虚拟机隔离安装指南
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub-Pages-brightgreen)](https://wangzx-seu.github.io/openclaw-guide/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%20LTS-orange)](https://ubuntu.com/)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-orange)](https://ubuntu.com/)
 [![VirtualBox](https://img.shields.io/badge/VirtualBox-7.0-blue)](https://www.virtualbox.org/)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-Latest-purple)](https://openclaw.ai/)
 
 ## 📖 简介
 
-这是一份详尽的 OpenClaw 虚拟机隔离安装指南，专为在 **Ubuntu 20.04 主机** 上通过 **VirtualBox 虚拟机** 隔离运行 OpenClaw 而设计。
+这是一份详尽的 OpenClaw 虚拟机隔离安装指南，专为在 **Ubuntu 24.04 主机** 上通过 **VirtualBox 虚拟机** 隔离运行 OpenClaw 而设计。
 
 ## ✨ 特点
 
@@ -20,7 +20,7 @@
 ## 📚 内容目录
 
 1. **准备工作与系统要求** - 检查硬件配置，下载所需文件
-2. **安装 VirtualBox 虚拟机软件** - 在 Ubuntu 20.04 上安装 VirtualBox
+2. **安装 VirtualBox 虚拟机软件** - 在 Ubuntu 24.04 上安装 VirtualBox
 3. **创建虚拟机并安装 Ubuntu** - 创建虚拟机，安装系统
 4. **虚拟机系统基础配置** - 换源、安装 Node.js
 5. **安装 OpenClaw** - 安装并配置 OpenClaw
@@ -50,7 +50,7 @@ cd openclaw-guide
 
 ## 📦 下载资源
 
-- [Ubuntu 20.04 LTS](https://ubuntu.com/download/desktop) - 系统镜像
+- [Ubuntu 24.04 LTS](https://ubuntu.com/download/desktop) - 系统镜像
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads) - 虚拟机软件
 - [OpenClaw 官方文档](https://docs.openclaw.ai/install) - 安装指南
 

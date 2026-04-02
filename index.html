@@ -583,8 +583,8 @@
         <!-- 头部 -->
         <header>
             <h1>🤖 OpenClaw 虚拟机隔离安装指南</h1>
-            <p>在 Ubuntu 20.04 主机上通过 VirtualBox 虚拟机隔离运行 OpenClaw</p>
-            <div class="version-badge">📅 更新于 2026年4月2日 | Ubuntu 20.04 LTS</div>
+            <p>在 Ubuntu 24.04 主机上通过 VirtualBox 虚拟机隔离运行 OpenClaw</p>
+            <div class="version-badge">📅 更新于 2026年4月2日 | Ubuntu 24.04 LTS</div>
         </header>
 
         <!-- 目录 -->
@@ -633,9 +633,9 @@
             <h3>1.1 环境说明</h3>
             <p>本指南适用于以下环境：</p>
             <ul>
-                <li><strong>主机系统：</strong>Ubuntu 20.04 LTS（你的当前系统）</li>
+                <li><strong>主机系统：</strong>Ubuntu 24.04 LTS（你的当前系统）</li>
                 <li><strong>虚拟机软件：</strong>VirtualBox（开源免费）</li>
-                <li><strong>虚拟机系统：</strong>Ubuntu 20.04 LTS（与主机相同版本，兼容性好）</li>
+                <li><strong>虚拟机系统：</strong>Ubuntu 24.04 LTS（与主机相同版本，兼容性好）</li>
                 <li><strong>目标应用：</strong>OpenClaw AI 助手</li>
             </ul>
 
@@ -700,22 +700,22 @@ df -h /</code>
 
             <h3>1.3 下载所需文件</h3>
 
-            <p>需要下载 Ubuntu 20.04 ISO 镜像文件：</p>
+            <p>需要下载 Ubuntu 24.04 ISO 镜像文件：</p>
 
             <div class="command-box">
                 <code># 方法1：使用 wget 下载（推荐，国内镜像源）
 cd ~/Downloads
-wget https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/ubuntu-20.04.6-desktop-amd64.iso
+wget https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/24.04/ubuntu-24.04.3-desktop-amd64.iso
 
 # 方法2：使用 curl 下载
-curl -L -o ubuntu-20.04.6-desktop-amd64.iso https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/ubuntu-20.04.6-desktop-amd64.iso</code>
+curl -L -o ubuntu-24.04.3-desktop-amd64.iso https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/24.04/ubuntu-24.04.3-desktop-amd64.iso</code>
             </div>
 
             <div class="tip">
                 <p><strong>下载地址备选：</strong></p>
                 <ul>
-                    <li>清华镜像：<code>https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/20.04/</code></li>
-                    <li>阿里镜像：<code>https://mirrors.aliyun.com/ubuntu-releases/20.04/</code></li>
+                    <li>清华镜像：<code>https://mirrors.tuna.tsinghua.edu.cn/ubuntu-releases/24.04/</code></li>
+                    <li>阿里镜像：<code>https://mirrors.aliyun.com/ubuntu-releases/24.04/</code></li>
                     <li>官方地址：<code>https://ubuntu.com/download/desktop</code></li>
                 </ul>
             </div>
@@ -729,7 +729,7 @@ curl -L -o ubuntu-20.04.6-desktop-amd64.iso https://mirrors.tuna.tsinghua.edu.cn
 
             <h3>2.1 安装 VirtualBox</h3>
 
-            <p>在 Ubuntu 20.04 主机上安装 VirtualBox：</p>
+            <p>在 Ubuntu 24.04 主机上安装 VirtualBox：</p>
 
             <div class="step">
                 <div class="step-number">1</div>
@@ -875,7 +875,7 @@ VBoxManage storageattach "OpenClaw-VM" --storagectl "SATA Controller" --port 0 -
 
 # 挂载 ISO 镜像
 VBoxManage storagectl "OpenClaw-VM" --name "IDE Controller" --add ide
-VBoxManage storageattach "OpenClaw-VM" --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ~/Downloads/ubuntu-20.04.6-desktop-amd64.iso</code>
+VBoxManage storageattach "OpenClaw-VM" --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ~/Downloads/ubuntu-24.04.3-desktop-amd64.iso</code>
             </div>
 
             <h3>3.2 配置虚拟机网络（重要！）</h3>
@@ -1491,7 +1491,7 @@ openclaw doctor     # 诊断</code>
         <!-- 页脚 -->
         <footer>
             <p>📖 OpenClaw 虚拟机隔离安装完整指南</p>
-            <p>适用于 Ubuntu 20.04 主机 + VirtualBox 虚拟机环境</p>
+            <p>适用于 Ubuntu 24.04 主机 + VirtualBox 虚拟机环境</p>
             <div class="version-info">📅 最后更新：2026年4月2日</div>
         </footer>
     </div>
