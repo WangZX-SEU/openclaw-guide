@@ -1175,17 +1175,18 @@ openclaw onboard --install-daemon</code>
             <h3>5.4 启动 OpenClaw</h3>
 
             <div class="command-box">
-                <code># 启动 OpenClaw Dashboard
+                <code>
+# 启动 OpenClaw Dashboard
 openclaw dashboard
 
 # 查看状态
 openclaw status
 
-# 查看日志
-openclaw logs
-
 # 重新加载gateway
 openclaw gateway restart
+
+# 查看配置文件
+sudo gedit ~/.openclaw/openclaw.json
             </code>
             </div>
 
@@ -1197,14 +1198,15 @@ openclaw gateway restart
             <div class="quick-ref">
                 <h3>⚡ OpenClaw 常用命令速查</h3>
                 <div class="command-box">
-                    <code>openclaw dashboard       # openclaw 网页
-openclaw stop        # 停止
-openclaw gateway restart     # 重启gateway
-openclaw status      # 查看状态
-openclaw logs        # 查看日志
-openclaw doctor      # 诊断问题
-openclaw --version   # 查看版本
-openclaw --help      # 帮助信息</code>
+                    <code>
+openclaw dashboard         # openclaw 网页
+openclaw config            # 重新配置openclaw文件，如model，channel等
+openclaw gateway restart   # 重启gateway
+openclaw status            # 查看状态
+openclaw logs              # 查看日志
+openclaw doctor            # 诊断问题
+openclaw --version         # 查看版本
+openclaw --help            # 帮助信息</code>
                 </div>
             </div>
         </div>
