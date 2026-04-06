@@ -863,10 +863,10 @@ sudo VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-*.vbox-extpa
                 <code># 创建虚拟机
 VBoxManage createvm --name "OpenClaw-VM" --register
 
-# 设置内存和 CPU
+# 设置内存和 CPU，请根据需要自行修改内存和CPU数量（默认4G+2核）
 VBoxManage modifyvm "OpenClaw-VM" --memory 4096 --cpus 2
 
-# 创建虚拟硬盘
+# 创建虚拟硬盘，请根据需要自行修改硬盘大小（默认51200）
 VBoxManage createhd --filename ~/VirtualBox\ VMs/OpenClaw-VM/disk.vdi --size 51200
 
 # 添加 SATA 控制器和硬盘
@@ -876,6 +876,10 @@ VBoxManage storageattach "OpenClaw-VM" --storagectl "SATA Controller" --port 0 -
 # 挂载 ISO 镜像
 VBoxManage storagectl "OpenClaw-VM" --name "IDE Controller" --add ide
 VBoxManage storageattach "OpenClaw-VM" --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium ~/Downloads/ubuntu-24.04.3-desktop-amd64.iso</code>
+            </div>
+
+            <div class="tip">
+                <p><strong>建议通过VirtualBox可视化界面：设置 —— 显示，将显存调到128MB，防止虚拟机系统卡顿。</strong></p>
             </div>
 
             <h3>3.2 配置虚拟机网络（重要！）</h3>
@@ -974,7 +978,7 @@ VBoxManage startvm "OpenClaw-VM" --type headless</code>
                 </div>
             </div>
 
-            <h3>3.4 安装 VirtualBox Guest Additions（增强功能）</h3>
+            <!-- <h3>3.4 安装 VirtualBox Guest Additions（增强功能）</h3>
 
             <p>增强功能可以提供更好的性能和功能（剪贴板共享、文件夹共享、全屏模式等）：</p>
 
@@ -1001,7 +1005,7 @@ sudo reboot</code>
                     <li>更好的图形性能</li>
                 </ul>
             </div>
-        </div>
+        </div> -->
 
         <!-- 第四部分：虚拟机系统配置 -->
         <div class="section" id="section4">
@@ -1013,6 +1017,13 @@ sudo reboot</code>
                 <code># 备份原始源文件
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
 
+# 调整至root用户
+su root
+
+# 如未初始化root用户密码，请执行初始化操作，再进入root模式
+sudo passwd
+su root
+
 # 使用阿里云源
 sudo cat > /etc/apt/sources.list << 'EOF'
 deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
@@ -1020,6 +1031,9 @@ deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe mu
 deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
 EOF
+
+# 返回到原始用户
+su \<用户名\>
 
 # 更新软件列表
 sudo apt update && sudo apt upgrade -y</code>
@@ -1161,14 +1175,18 @@ openclaw onboard --install-daemon</code>
             <h3>5.4 启动 OpenClaw</h3>
 
             <div class="command-box">
-                <code># 启动 OpenClaw
-openclaw start
+                <code># 启动 OpenClaw Dashboard
+openclaw dashboard
 
 # 查看状态
 openclaw status
 
 # 查看日志
-openclaw logs</code>
+openclaw logs
+
+# 重新加载gateway
+openclaw gateway restart
+            </code>
             </div>
 
             <div class="success">
@@ -1179,9 +1197,9 @@ openclaw logs</code>
             <div class="quick-ref">
                 <h3>⚡ OpenClaw 常用命令速查</h3>
                 <div class="command-box">
-                    <code>openclaw start       # 启动
+                    <code>openclaw dashboard       # openclaw 网页
 openclaw stop        # 停止
-openclaw restart     # 重启
+openclaw gateway restart     # 重启gateway
 openclaw status      # 查看状态
 openclaw logs        # 查看日志
 openclaw doctor      # 诊断问题
